@@ -7,13 +7,14 @@ param(
     [Parameter(Mandatory = $true)]
     [securestring]$Pat
 )
+
 # Authentifizierungs-Header erzeugen
 $pat64 = [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("PAT:$(ConvertFrom-SecureString $Pat -AsPlainText)"))
 $headers = @{
     'Authorization' = 'Basic ' + $pat64
 }
 
-# Work Item bearbeiten
+# Work Items abfragen
 $apiUri = "https://dev.azure.com/$($Organization)/$($Project)/_apis/wit/wiql?api-version=6.0"
 $body = @{query= "Select [System.ID] From workitems Where [Changed Date] >= @StartofDay('-30d')"} | ConvertTo-Json
 $response = Invoke-WebRequest -Uri $apiUri -Method Post -Headers $headers -Body $body -ContentType "application/json"
